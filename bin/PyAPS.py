@@ -12,6 +12,7 @@ import matplotlib.patches as ptch
 from scipy.interpolate import interp1d,LinearNDInterpolator
 from scipy.integrate import cumtrapz
 import numpy as np
+import math
 
 
 #######Initialization of constants######################
@@ -119,53 +120,57 @@ def geo_rsc(input_name):
 
 ##########Interpolating to heights from Pressure levels###########
 def intP2H(lvls, hgt, gph, tmp, vpr, cdic):
-    #Interpolates the pressure level data to altitude.
-    #gph = Geopotential height
-    #tmp = Temperature
-    #vpr = Vapor pressure
-    #hgt = regular grid of height values.
-    #gph,tmp,vpr are of size(nstn,nlvls)
+    """
+    Interpolates the pressure level data to altitude.
+    :param gph: Geopotential height
+    :param tmp: Temperature
+    :param vpr: Vapor pressure
+    :param hgt: regular grid of height values.
+    :param cdic: ?
+    gph,tmp,vpr are of size(nstn,nlvls)
+    """
 
-    minAlt = cdic['minAlt']      #Hardcoded parameter.
-    maxAlt = cdic['maxAlt']     #Hardcoded parameter.
+    min_alt = cdic['minAlt']     # Hardcoded parameter.
+    max_alt = cdic['maxAlt']     # Hardcoded parameter.
 
     print 'PROGRESS: INTERPOLATING FROM PRESSURE TO HEIGHT LEVELS'
-    nstn = gph.shape[1]           #Number of stations
-    nhgt = len(hgt)               #Number of height points
-    Presi = zeros((nstn, nhgt))
-    Tempi = zeros((nstn, nhgt))
-    Vpri = zeros((nstn, nhgt))
+    nstn = gph.shape[1]           # Number of stations
+    nhgt = len(hgt)               # Number of height points
+    Presi = np.zeros((nstn, nhgt))
+    Tempi = np.zeros((nstn, nhgt))
+    Vpri = np.zeros((nstn, nhgt))
 
     for i in range(nstn):
-        temp = gph[:, i]       #Obtaining height values
+        temp = gph[:, i]       # Obtaining height values
         hx = temp.copy()
-        sFlag = False
-        eFlag = False
-        if hx.min() > minAlt:          #Add point at start
-            sFlag = True
-            hx = concatenate((hx, [minAlt-1]), axis=1)
+        s_flag = False
+        e_flag = False
+        if hx.min() > min_alt:          # Add point at start
+            s_flag = True
+            hx = np.concatenate((hx, [min_alt-1]))
 
-        if hx.max() < maxAlt:		#Add point at end
-            eFlag = True
-            hx = concatenate(([maxAlt+1], hx), axis=1)
+        if hx.max() < max_alt:		#Add point at end
+            e_flag = True
+            hx = np.concatenate(([max_alt+1], hx))
 
         hx = -hx             #Splines needs monotonically increasing.
 
         hy = lvls.copy()     #Interpolating pressure values
-        if sFlag:
+        if s_flag:
             val = hy[-1] + (hx[-1] - hx[-2])*(hy[-1] - hy[-2])/(hx[-2]-hx[-3])
-            hy = concatenate((hy, [val]), axis=1)
-        if eFlag:
+            hy = np.concatenate((hy, [val]))
+        if e_flag:
             val = hy[0] - (hx[0] - hx[1])*(hy[0] - hy[1])/(hx[1]-hx[2])
-            hy = concatenate(([val], hy), axis=1)
+            hy = np.concatenate(([val], hy))
 
-            tck = interp1d(hx, hy, kind='cubic')
+        tck = interp1d(hx, hy, kind='cubic')
+
         temp = tck(-hgt)      #Again negative for consistency with hx
-        if sFlag & eFlag:
+        if s_flag & e_flag:
             Presi[i, :] = temp[1:nhgt+1].copy()
-        elif sFlag:
+        elif s_flag:
             Presi[i, :] = temp[0:nhgt].copy()
-        elif eFlag:
+        elif e_flag:
             Presi[i, :] = temp[1:nhgt+1].copy()
         else:
             Presi[i, :] = temp.copy()
@@ -174,20 +179,20 @@ def intP2H(lvls, hgt, gph, tmp, vpr, cdic):
 
         temp = tmp[:, i]		#Interpolating temperature
         hy = temp.copy()
-        if sFlag:
+        if s_flag:
             val = hy[-1] + (hx[-1] - hx[-2])*(hy[-1] - hy[-2])/(hx[-2]-hx[-3])
-            hy = concatenate((hy, [val]), axis=1)
-        if eFlag:
+            hy = np.concatenate((hy, [val]))
+        if e_flag:
             val = hy[0] - (hx[0] - hx[1]) * (hy[0] - hy[1])/(hx[1]-hx[2])
-            hy = concatenate(([val], hy), axis=1)
+            hy = np.concatenate(([val], hy))
 
         tck = interp1d(hx, hy, kind='cubic')
         temp = tck(-hgt)
-        if sFlag & eFlag:
+        if s_flag & e_flag:
             Tempi[i, :] = temp[1:nhgt+1].copy()
-        elif sFlag:
+        elif s_flag:
             Tempi[i, :] = temp[0:nhgt].copy()
-        elif eFlag:
+        elif e_flag:
             Tempi[i, :] = temp[1:nhgt+1].copy()
         else:
             Tempi[i, :] = temp.copy()
@@ -196,20 +201,20 @@ def intP2H(lvls, hgt, gph, tmp, vpr, cdic):
 
         temp = vpr[:, i]          #Interpolating vapor pressure
         hy = temp.copy()
-        if sFlag:
+        if s_flag:
             val = hy[-1] + (hx[-1] - hx[-2])*(hy[-1] - hy[-2])/(hx[-2]-hx[-3])
-            hy = concatenate((hy, [val]), axis=1)
-        if eFlag:
+            hy = np.concatenate((hy, [val]))
+        if e_flag:
             val = hy[0] - (hx[0] - hx[1]) * (hy[0] - hy[1])/(hx[1]-hx[2])
-            hy = concatenate(([val], hy), axis=1)
+            hy = np.concatenate(([val], hy))
 
         tck = interp1d(hx, hy, kind='cubic')
         temp = tck(-hgt)
-        if sFlag & eFlag:
+        if s_flag & e_flag:
             Vpri[i, :] = temp[1:nhgt+1].copy()
-        elif sFlag:
+        elif s_flag:
             Vpri[i, :] = temp[0:nhgt].copy()
-        elif eFlag:
+        elif e_flag:
             Vpri[i, :] = temp[1:nhgt+1].copy()
         else:
             Vpri[i, :] = temp.copy()
@@ -244,25 +249,25 @@ def PTV2del(Presi,Tempi,Vpri,hgt,cdict):
     g = cdict['g']
 
     #Dry delay
-    DDry2 = zeros((nstn, nhgt))
+    DDry2 = np.zeros((nstn, nhgt))
     for i in range(nstn):
-        DDry2[i, :] = k1*Rd*(Presi[i, :] - Presi[i, -1])*1.0e-6/(cos(inc)*g)
+        DDry2[i, :] = k1*Rd*(Presi[i, :] - Presi[i, -1])*1.0e-6/(math.cos(inc)*g)
 
-    DDry2 = 4.0*pi*DDry2/wvl
+    DDry2 = 4.0*math.pi*DDry2/wvl
 
     #Wet delay
     S1 = cumtrapz(WonT, x=hgt, axis=-1)
     val = 2*S1[:, -1]-S1[:, -2]
     val = val[:, None]
-    S1 = concatenate((S1, val), axis=-1)
+    S1 = np.concatenate((S1, val), axis=-1)
     del WonT
 
     S2 = cumtrapz(WonT2, x=hgt, axis=-1)
     val = 2*S2[:, -1]-S2[:, -2]
     val = val[:, None]
-    S2 = concatenate((S2, val), axis=-1)
-    DWet2 = 1.0e-6*((k2-k1*Rd/Rv)*S1+k3*S2)/cos(inc)
-    DWet2 = -4*pi*DWet2/wvl
+    S2 = np.concatenate((S2, val), axis=-1)
+    DWet2 = 1.0e-6*((k2-k1*Rd/Rv)*S1+k3*S2)/math.cos(inc)
+    DWet2 = -4*math.pi*DWet2/wvl
     for k in range(nstn):
         DWet2[k, :] = DWet2[k, :] - DWet2[k, -1]
 
@@ -291,7 +296,7 @@ def glob2rdr(nx, ny, lat, lon, latl, lonl):
 
     #Get grid points xi yi coordinates from this mapping function
     nstn = len(latl)
-    A = np.array([latl, lonl, np.ones((nstn, 1))]).conj().T
+    A = np.array([latl, lonl, np.ones(nstn)]).conj().T
     xi = np.dot(A, mfcn[:, 0])
     yi = np.dot(A, mfcn[:, 1])
 
@@ -302,7 +307,7 @@ def glob2rdr(nx, ny, lat, lon, latl, lonl):
         plt.scatter(lonl, latl, s=8, c='k')
         xline=[lon[0], lon[1], lon[3], lon[2], lon[0]]
         yline=[lat[0], lat[1], lat[3], lat[2], lat[0]]
-        plot(xline, yline, '-r')
+        plt.plot(xline, yline, '-r')
         plt.title('Area of interest and %d stations used' % nstn)
         plt.xlabel('Longitude')
         plt.ylabel('Latitude')
@@ -327,8 +332,8 @@ def make3dintp(Delfn,lonlist,latlist,hgt,hgtscale):
     ##latlist = list of lats for stations. / y
     nstn = Delfn.shape[0]
     nhgt = Delfn.shape[1]
-    xyz = zeros((nstn*nhgt, 3))
-    Delfn = reshape(Delfn, (nstn*nhgt, 1))
+    xyz = np.zeros((nstn*nhgt, 3))
+    Delfn = np.reshape(Delfn, (nstn*nhgt, 1))
     count = 0
     for m in range(nstn):
         for n in range(nhgt):
@@ -337,7 +342,7 @@ def make3dintp(Delfn,lonlist,latlist,hgt,hgtscale):
             xyz[count,2] = hgt[n]/hgtscale     #For same grid spacing as lat/lon
             count += 1
 
-    xyz[:, 2] = xyz[:, 2] + 0.001*rand((nstn*nhgt))/hgtscale #For unique Delaunay
+    xyz[:, 2] = xyz[:, 2] + 0.001*np.random.rand((nstn*nhgt))/hgtscale  # For unique Delaunay
     del latlist
     del lonlist
     del hgt

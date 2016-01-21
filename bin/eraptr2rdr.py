@@ -156,15 +156,15 @@ fin = open(dname, 'rb')
 fout = open(oname, 'wb')
 
 for m in range(0, 2*ny, 2):
-    dem = fromfile(file=fin, dtype=float32, count=nx)
-    dem = fromfile(file=fin, dtype=float32, count=nx)
+    dem = fromfile(file=fin, dtype=np.float32, count=nx)
+    dem = fromfile(file=fin, dtype=np.float32, count=nx)
     dem[dem<minAltp] = minAltp
-    demy = dem.astype(float64)
+    demy = dem.astype(np.float64)
     y=ones((nx,))*yarr[int(m/2)]
     d=demy/hgtscale
     llh=hstack([xarr[:, newaxis], y[:, newaxis], d[:, newaxis]])
     res = fnc(llh)
-    resy = res.astype(float32)
+    resy = res.astype(np.float32)
     resy.tofile(fout)
 
 fin.close()
