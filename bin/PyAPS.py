@@ -95,8 +95,8 @@ def geo_rsc(input_name):
 
     nx = int(rpacdict['WIDTH'])
     ny = int(rpacdict['FILE_LENGTH'])
-    lat = zeros((2, 1))
-    lon = zeros((2, 1))
+    lat = np.zeros((2, 1))
+    lon = np.zeros((2, 1))
     lat[1] = float(rpacdict['Y_FIRST'])
     lon[0] = float(rpacdict['X_FIRST'])
     if lon[0] < 0:
