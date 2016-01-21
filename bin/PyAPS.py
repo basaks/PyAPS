@@ -7,14 +7,11 @@
 ######################################################################
 
 import pygrib
-import sys
-import os.path
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
 from scipy.interpolate import interp1d,LinearNDInterpolator
 from scipy.integrate import cumtrapz
-from numpy import random
-from pylab import *
+import numpy as np
 
 
 #######Initialization of constants######################
@@ -63,8 +60,8 @@ def rd_rsc(inname):
 
     nx = int(rpacdict['WIDTH'])
     ny = int(rpacdict['FILE_LENGTH'])
-    lat=zeros((4, 1))
-    lon=zeros((4, 1))
+    lat = np.zeros((4, 1))
+    lon = np.zeros((4, 1))
     lat[0] = float(rpacdict['LAT_REF1'])
     lon[0] = float(rpacdict['LON_REF1'])
     lat[1] = float(rpacdict['LAT_REF2'])
@@ -288,15 +285,15 @@ def glob2rdr(nx, ny, lat, lon, latl, lonl):
     # Fourth point is (nx,ny) i.e. Far Range, Last Lane <==> Lat[4],Lon[4]
 
     #	A=array([(lat[0], lon[0], 1.),(lat[1], lon[1], 1.),(lat[2], lon[2], 1.),(lat[3], lon[3], 1.)])
-    A = hstack([lat, lon, ones((4, 1))])
-    b = array([[1, 1], [nx, 1], [1, ny], [nx, ny]])
-    mfcn=linalg.lstsq(A, b)[0]
+    A = np.hstack([lat, lon, np.ones((4, 1))])
+    b = np.array([[1, 1], [nx, 1], [1, ny], [nx, ny]])
+    mfcn = np.linalg.lstsq(A, b)[0]
 
     #Get grid points xi yi coordinates from this mapping function
     nstn = len(latl)
-    A = array([latl, lonl, ones((nstn,1))]).conj().T
-    xi = dot(A, mfcn[:, 0])
-    yi = dot(A, mfcn[:, 1])
+    A = np.array([latl, lonl, np.ones((nstn, 1))]).conj().T
+    xi = np.dot(A, mfcn[:, 0])
+    yi = np.dot(A, mfcn[:, 1])
 
     plotflag = 'n'
     if plotflag in ('y', 'Y'):
@@ -330,8 +327,8 @@ def make3dintp(Delfn,lonlist,latlist,hgt,hgtscale):
     ##latlist = list of lats for stations. / y
     nstn = Delfn.shape[0]
     nhgt = Delfn.shape[1]
-    xyz = zeros((nstn*nhgt,3))
-    Delfn = reshape(Delfn,(nstn*nhgt,1))
+    xyz = zeros((nstn*nhgt, 3))
+    Delfn = reshape(Delfn, (nstn*nhgt, 1))
     count = 0
     for m in range(nstn):
         for n in range(nhgt):
@@ -400,7 +397,7 @@ def cc_eraorig(tmp, cdic):
     T3 = cdic['T3']
     Rv = cdic['Rv']
 
-    esat = a1w*exp((2.5e6/Rv) * ((1/T3) - (1/tmp)))
+    esat = a1w*np.exp((2.5e6/Rv) * ((1/T3) - (1/tmp)))
 
     return esat
 ###############Completed CC_ERAORIG#####################################
@@ -423,7 +420,7 @@ def cc_narr(tmp,cdic):
     a4w = cdic['a4w']
     T3 = cdic['T3']
     Rv = cdic['Rv']
-    esat = a1w*exp(a3w*(tmp-T3)/(tmp-a4w))
+    esat = a1w*np.exp(a3w*(tmp-T3)/(tmp-a4w))
     return esat
 ###############Completed CC_NARR#####################################
 
@@ -512,7 +509,7 @@ def read_eratxt(fname, cdic):
     tmp = f.readlines()
     i = 0
     nstn = 0
-    maxloop = int(size(tmp))
+    maxloop = int(np.size(tmp))
     while i < maxloop:
         if tmp[i][0] == '-':
             nstn += 1
@@ -540,24 +537,24 @@ def read_eratxt(fname, cdic):
                 reht.append(float(val[3]))
                 i += 1
 
-    gpht = array(gpht)/g
-    gph = flipud(gpht.reshape((n, nstn), order='F'))
+    gpht = np.array(gpht)/g
+    gph = np.flipud(gpht.reshape((n, nstn), order='F'))
     del gpht
 
-    tmpt = array(tmpt)
+    tmpt = np.array(tmpt)
     esat = cc_eraorig(tmpt, cdic)
-    tmp = flipud(tmpt.reshape((n, nstn), order='F'))
+    tmp = np.flipud(tmpt.reshape((n, nstn), order='F'))
     del tmpt
 
-    vprt = (array(reht)/100.)*esat
-    vpr = flipud(vprt.reshape((n, nstn), order='F'))
+    vprt = (np.array(reht)/100.)*esat
+    vpr = np.flipud(vprt.reshape((n, nstn), order='F'))
     del vprt
     del esat
 
-    lvls = flipud(array(lvls))
+    lvls = np.flipud(np.array(lvls))
     lvls = lvls[0:n]
 
-    lonlist = array(lonlist)
-    latlist = array(latlist)
+    lonlist = np.array(lonlist)
+    latlist = np.array(latlist)
 
     return lvls, latlist, lonlist, gph, tmp, vpr
