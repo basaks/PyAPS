@@ -11,17 +11,13 @@
 
 #--------------------------------------------------------
 #Import Routines from PyAPS
-import PyAPS
-import pygrib
 import sys
-from sys import stdout
-import os.path
-import matplotlib.pyplot as plt
-import matplotlib.patches as ptch
-from scipy.interpolate import interp1d,LinearNDInterpolator
-from scipy.integrate import cumtrapz
-from pylab import *
-from numpy import random
+import os
+import math
+import numpy as np
+
+import PyAPS
+
 
 #--------------------------------------------------------
 #Arguments
@@ -83,7 +79,7 @@ oname = sys.argv[3]
 wvl = float(sys.argv[4])/100.0
 
 #Incidence angle, conversion deg to rad
-inc = float(sys.argv[5])*pi/180.0
+inc = float(sys.argv[5])*math.pi/180.0
 
 #--------------------------------------------------------
 # Initialize Constants 
@@ -98,7 +94,7 @@ minAlt = cdic['minAlt']
 maxAlt = cdic['maxAlt']
 nhgt = cdic['nhgt']
 minAltp = cdic['minAltP']
-hgt = linspace(minAlt, maxAlt, nhgt)
+hgt = np.linspace(minAlt, maxAlt, nhgt)
 
 # Scaling for interpolation
 # For rdr geom grid is about 200*200 pixels
@@ -150,18 +146,18 @@ fnc = PyAPS.make3dintp(Delfn, xi, yi, hgt, hgtscale)
 
 print 'PROGRESS: WRITING TO FILE'
 
-yarr = arange(1, ny+1)
-xarr = arange(1, nx+1)
+yarr = np.arange(1, ny+1)
+xarr = np.arange(1, nx+1)
 # fin = open(dname, 'rb')
 fout = open(oname, 'wb')
 
 for m in range(0, 2*ny, 2):
-    dem = fromfile(file=dname, dtype=np.float32, count=nx)
+    dem = np.fromfile(file=dname, dtype=np.float32, count=nx)
     dem[dem < minAltp] = minAltp
     demy = dem.astype(np.float64)
-    y = ones((nx,))*yarr[int(m/2)]
+    y = np.ones((nx,))*yarr[int(m/2)]
     d = demy/hgtscale
-    llh = hstack([xarr[:, newaxis], y[:, newaxis], d[:, newaxis]])
+    llh = np.hstack([xarr[:, np.newaxis], y[:, np.newaxis], d[:, np.newaxis]])
     res = fnc(llh)
     resy = res.astype(np.float32)
     resy.tofile(fout)

@@ -11,16 +11,10 @@
 
 #--------------------------------------------------------
 #Import Routines from PyAPS
+
 import PyAPS
-import pygrib
 import sys
-from sys import stdout
 import os.path
-import matplotlib.pyplot as plt
-import matplotlib.patches as ptch
-from scipy.interpolate import interp1d,LinearNDInterpolator
-from scipy.integrate import cumtrapz
-from numpy import random
 import math
 import numpy as np
 
