@@ -49,3 +49,7 @@ LOOK_REF4                                23.4899
 LAT_REF4                                 34.7271                       
 LON_REF4                                 93.7678                       
 PROJECTION                               LL
+X_FIRST       93.75
+Y_FIRST       37.5
+X_STEP        0.000416667
+Y_STEP        -0.000416667
