@@ -369,8 +369,8 @@ def cc_era(tmp, cdic):
     T3 = cdic['T3']
     Ti = cdic['Ti']
 
-    esatw = a1w*exp(a3w*(tmp-T3)/(tmp-a4w))
-    esati = a1i*exp(a3i*(tmp-T3)/(tmp-a4i))
+    esatw = a1w*np.exp(a3w*(tmp-T3)/(tmp-a4w))
+    esati = a1i*np.exp(a3i*(tmp-T3)/(tmp-a4i))
     esat = esati.copy()
     for k in range(len(tmp)):
         if tmp[k] >= T3:
@@ -436,11 +436,11 @@ def get_era(fname,minlat,maxlat,minlon,maxlon,cdic):
     ###Note that Lon values should be between [0-360].
     ###GRB file with weather model data can be downloaded from http://dss.ucar.edu/datasets/ds627.0/
     print 'PROGRESS: READING GRIB FILE'
-    lvls = array([1, 2, 3, 5, 7, 10, 20, 30, 50, 70, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 775, 800, 825, 850, 875, 900, 925, 950, 975, 1000])
+    lvls = np.array([1, 2, 3, 5, 7, 10, 20, 30, 50, 70, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 775, 800, 825, 850, 875, 900, 925, 950, 975, 1000])
     nlvls = len(lvls)
 
     alpha = cdic['Rv']/cdic['Rd']
-    gphind = arange(nlvls)*12+1
+    gphind = np.arange(nlvls)*12+1
 
     grbs = pygrib.open(fname)
     grbs.seek(gphind[0])
@@ -449,19 +449,18 @@ def get_era(fname,minlat,maxlat,minlon,maxlon,cdic):
     g = cdic['g']
     mask = (lats > minlat) & (lats < maxlat) \
         & (lons > minlon) & (lons < maxlon)
-    [ii, jj] = where(mask)
+    [ii, jj] = np.where(mask)
     del mask
     latlist = lats[ii, jj]
     lonlist = lons[ii, jj]
-    nstn = size(ii)
+    nstn = np.size(ii)
 
     ####Create arrays for 3D storage
-    gph = zeros((nlvls, nstn))   #Potential height
+    gph = np.zeros((nlvls, nstn))   #Potential height
     tmp = gph.copy()                  #Temperature
     vpr = gph.copy()                  #Vapor pressure
     print 'Number of stations:', nstn
-
-    lvls *= 100.0              #Conversion to absolute pressure
+    lvls = np.multiply(lvls, 100.0)              #Conversion to absolute pressure
     for i in range(nlvls):
         grbs.seek(gphind[i])   #Reading potential height.
         grb = grbs.read(3)

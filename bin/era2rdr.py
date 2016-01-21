@@ -132,10 +132,10 @@ print 'PROGRESS: WRITING TO FILE'
 
 yarr = np.arange(1, ny+1)
 xarr = np.arange(1, nx+1)
-fin = open(dname, 'rb')
+# fin = open(dname, 'rb')
 fout = open(oname, 'wb')
 for m in range(0, 2*ny, 2):
-    dem = np.fromfile(file=fin, dtype=np.float32, count=nx)
+    dem = np.fromfile(file=dname, dtype=np.float32, count=nx)
     dem[dem < minAltp] = minAltp
     demy = dem.astype(np.float64)
     y = np.ones((nx,))*yarr[int(m/2)]
@@ -145,7 +145,7 @@ for m in range(0, 2*ny, 2):
     resy = res.astype(np.float32)
     resy.tofile(fout)
 
-fin.close()
+# fin.close()
 fout.close()
 print 'PROGRESS: COMPLETE'
 
