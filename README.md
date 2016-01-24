@@ -3,6 +3,40 @@ This repo starts from the PyAPS code I could download from google code archive f
 
 More recent code may exist here: http://earthdef.caltech.edu/
 
+## Creating a conda `virtualenv` for `PyAPS`
+
+####  Install anaconda:
+
+On 64bit linux:
+    
+    bash Anaconda2-2.4.1-Linux-x86_64.sh
+
+Please accept all defaults. This will install anaconda in the `~/anaconda2` directory.
+ 
+You will need to download and install the appropriate version for your OS. The following instructions are for ubuntu 14.04 and are exptect to work for most versions of ubuntu.
+
+#### Install `conda-env`
+
+    source ~/anaconda2/bin/activate anaconda2/
+    conda install -c conda conda-env
+
+#### Create the `pyaps` environment
+    
+    conda env create -f environment.yml
+    ~/anaconda2/bin/conda env create -f path/to/PyAPS/environment.yml
+
+#### Activate the `pyaps` environment
+
+    source ~/anaconda2/bin/activate pyaps
+    
+#### Back to main anaconda if you need to:
+    
+    source activate /home/user/anaconda2
+    
+#### Deactivate
+Once you are done using `pyaps` you could deactivate from the conda env using: 
+
+    source deactivate
 
 ## Run eraptr2rdr.py
 

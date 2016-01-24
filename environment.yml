@@ -1,0 +1,10 @@
+name: pyaps
+channels:
+  - nmoraitakis
+  - mutirri
+dependencies:
+  - numpy
+  - matplotlib
+  - scipy
+  - pygrib
+  - pyhdf
